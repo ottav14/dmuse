@@ -3,7 +3,7 @@ import styles from './App.module.css';
 
 function App() {
 
-	const [ keys, setKeys] = useState(Array(7).fill(false));
+	const [ keys, setKeys] = useState(Array(8).fill(false));
 
 
 	useEffect(() => {
@@ -24,7 +24,8 @@ function App() {
 			'v': 3,
 			'n': 4,
 			'm': 5,
-			',': 6
+			',': 6,
+			'.': 7
 		}
 
 		const handleKeyDown = (e) => {
@@ -44,20 +45,31 @@ function App() {
 		};
 	}, []);
 
-	const WhiteKey = (ix) => {
+	const Key = (ix) => {
 		return (
-			<div className={keys[ix] ? styles.active : styles.whiteKey} />
+			<div className={keys[ix] ? styles.active : styles.inActive} />
 		);
 	}
 
+	useEffect(() => {
+	}, [keys]);
+
 	return (
 		<div className={styles.main}>
-			{keys.map((val, i) => (
-				<div
-					className={keys[i] ? styles.active : styles.whiteKey}
-					key={i}
-				/>
-			))}
+			<div className={styles.keys}>
+				<div className={styles.left}>
+					<div className={keys[0] ? styles.active : styles.inActive} />
+					<div className={keys[1] ? styles.active : styles.inActive} />
+					<div className={keys[2] ? styles.active : styles.inActive} />
+					<div className={keys[3] ? styles.active : styles.inActive} />
+				</div>
+				<div className={styles.right}>
+					<div className={keys[4] ? styles.active : styles.inActive} />
+					<div className={keys[5] ? styles.active : styles.inActive} />
+					<div className={keys[6] ? styles.active : styles.inActive} />
+					<div className={keys[7] ? styles.active : styles.inActive} />
+				</div>
+			</div>
 		</div>
 	);
 }
