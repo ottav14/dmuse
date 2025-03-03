@@ -3,10 +3,34 @@ import styles from './App.module.css';
 
 function App() {
 
-	const [ keys, setKeys] = useState(Array(8).fill(false));
+	const [ keys, setKeys ] = useState(Array(8).fill(false));
+	const [ notes, setNotes ] = useState([]);
+	const [ loading, setLoading ] = useState(true);
+	const [ playing, setPlaying ] = useState(false);
 
+	const speed = 10;
 
 	useEffect(() => {
+
+		const spawnNote = (x) => {
+			setNotes(prev => {
+				const newNote = {
+					x: x,
+					y: 0,
+					id: Date.now()
+				}
+				return [...notes, newNote];
+			});
+		}
+
+		if(loading) {
+			setTimeout(() => {
+				spawnNote(0);
+				setLoading(false);
+				setPlaying(true);
+			}, 2000);
+		}
+
 		const updateKey = (ix, val) => {
 			setKeys(prev => {
 				if(!prev)
@@ -45,6 +69,49 @@ function App() {
 		};
 	}, []);
 
+	useEffect(() => {
+		const moveNote = (id, newY) => {
+			setNotes(prev => {
+				const newNotes = [...prev];
+				for(const note of newNotes)
+					if(note.id === id)
+						note.y = newY;
+				return newNotes;
+			});
+		}
+
+		const deleteNote = (id) => {
+			setNotes(prev => {
+				const newNotes = [...prev];
+				for(let i=0; i<newNotes.length; i++) {
+					if(newNotes[i].id === id) {
+						newNotes.splice(i, 1);
+						return newNotes;
+					}
+				}
+				return newNotes;
+			});
+		}
+
+		if(playing) {
+			const interval = setInterval(() => {
+				for(const note of notes) {
+					const newY = note.y + speed;
+					if(newY > window.innerHeight + 50) {
+						deleteNote(note.id);
+						continue;
+					}
+					moveNote(note.id, newY);
+					const element = document.getElementById(note.id);
+					if(element) {
+						element.style.transform = `translateY(${newY}px)`;
+					}
+				}
+			}, 16);
+			return () => clearInterval(interval);
+		}
+	}, [playing]);
+
 	const Key = (ix) => {
 		return (
 			<div className={keys[ix] ? styles.active : styles.inActive} />
@@ -52,11 +119,16 @@ function App() {
 	}
 
 	useEffect(() => {
-	}, [keys]);
+	}, [notes]);
 
 	return (
 		<div className={styles.main}>
-			<div className={styles.keys}>
+			<div className={styles.notes}>
+				{notes.map((note) => (
+					<div className={styles.note} key={note.id} id={note.id} />
+				))}
+			</div>
+			<div id='fart' className={styles.keys}>
 				<div className={styles.left}>
 					<div className={keys[0] ? styles.active : styles.inActive} />
 					<div className={keys[1] ? styles.active : styles.inActive} />
