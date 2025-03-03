@@ -3,7 +3,7 @@ import styles from './App.module.css';
 
 function App() {
 
-	const [ keys, setKeys ] = useState(Array(8).fill(false));
+	const [ keys, setKeys ] = useState(Array(4).fill(false));
 	const [ notes, setNotes ] = useState([]);
 	const [ loading, setLoading ] = useState(true);
 	const [ playing, setPlaying ] = useState(false);
@@ -15,7 +15,7 @@ function App() {
 		const spawnNote = (x) => {
 			setNotes(prev => {
 				const newNote = {
-					x: x,
+					x: 14/3*x,
 					y: 0,
 					id: Date.now()
 				}
@@ -25,7 +25,7 @@ function App() {
 
 		if(loading) {
 			setTimeout(() => {
-				spawnNote(0);
+				spawnNote(3);
 				setLoading(false);
 				setPlaying(true);
 			}, 2000);
@@ -42,14 +42,10 @@ function App() {
 		}
 
 		const controls = {
-			'z': 0,
-			'x': 1,
-			'c': 2,
-			'v': 3,
-			'n': 4,
-			'm': 5,
-			',': 6,
-			'.': 7
+			'x': 0,
+			'c': 1,
+			',': 2,
+			'.': 3
 		}
 
 		const handleKeyDown = (e) => {
@@ -104,7 +100,7 @@ function App() {
 					moveNote(note.id, newY);
 					const element = document.getElementById(note.id);
 					if(element) {
-						element.style.transform = `translateY(${newY}px)`;
+						element.style.transform = `translate(${note.x}rem, ${newY}px)`;
 					}
 				}
 			}, 16);
@@ -129,18 +125,10 @@ function App() {
 				))}
 			</div>
 			<div id='fart' className={styles.keys}>
-				<div className={styles.left}>
-					<div className={keys[0] ? styles.active : styles.inActive} />
-					<div className={keys[1] ? styles.active : styles.inActive} />
-					<div className={keys[2] ? styles.active : styles.inActive} />
-					<div className={keys[3] ? styles.active : styles.inActive} />
-				</div>
-				<div className={styles.right}>
-					<div className={keys[4] ? styles.active : styles.inActive} />
-					<div className={keys[5] ? styles.active : styles.inActive} />
-					<div className={keys[6] ? styles.active : styles.inActive} />
-					<div className={keys[7] ? styles.active : styles.inActive} />
-				</div>
+				<div className={keys[0] ? styles.active : styles.inActive} />
+				<div className={keys[1] ? styles.active : styles.inActive} />
+				<div className={keys[2] ? styles.active : styles.inActive} />
+				<div className={keys[3] ? styles.active : styles.inActive} />
 			</div>
 		</div>
 	);
