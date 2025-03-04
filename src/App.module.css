@@ -5,7 +5,7 @@
 .main {
 	display: flex;
 	flex-direction: column;
-	justify-content: flex-end;
+	justify-content: center;
 	align-items: center;
 	width: 100vw;
 	height: 100vh;
@@ -18,9 +18,11 @@
 }
 
 .keys {
+	position: absolute;
+	bottom: 0;
 	display: flex;
 	justify-content: space-between;
-	margin-bottom: 10rem;
+	margin-bottom: 2rem;
 }
 
 .inActive, .active, .note {
@@ -31,11 +33,11 @@
 }
 
 .inActive{
-	background-color: #fff;
+	background-color: #fef0;
 }
 
 .active {
-	background-color: #00f;
+	background-color: #00f8;
 }
 
 .left, .right {
@@ -46,10 +48,14 @@
 }
 
 .notes {
+	position: relative;
 	height: 70vh;
 	background-color: #fef;
+	overflow: hidden;
 }
 
 .note {
+	position: absolute;
 	background-color: #f00;
+	top: calc(-1.5 * var(--diameter));
 }
