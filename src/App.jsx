@@ -38,11 +38,35 @@ function App() {
 	const spawnNote = (x) => {
 		setNotes(prev => {
 			const newNote = {
-				x: 14/3*x,
+				x: 24/5*x + 4/5,
 				y: 0,
-				id: Date.now()
+				id: Date.now(),
+				lane: x
 			}
 			return [...notes, newNote];
+		});
+	}
+
+	const moveNote = (id, newY) => {
+		setNotes(prev => {
+			const newNotes = [...prev];
+			for(const note of newNotes)
+				if(note.id === id)
+					note.y = newY;
+			return newNotes;
+		});
+	}
+
+	const deleteNote = (id) => {
+		setNotes(prev => {
+			const newNotes = [...prev];
+			for(let i=0; i<newNotes.length; i++) {
+				if(newNotes[i].id === id) {
+					newNotes.splice(i, 1);
+					return newNotes;
+				}
+			}
+			return newNotes;
 		});
 	}
 
@@ -73,6 +97,15 @@ function App() {
 				return newKeys;
 			});
 		}
+		
+		const checkHit = (ix) => {
+			const currentNotes = notesRef.current;
+			for(const note of currentNotes) {
+				if(note.lane === ix && note.y >= 750 && note.y <= 900) {
+					deleteNote(note.id);
+				}
+			}
+		}
 
 		const controls = {
 			'x': 0,
@@ -83,6 +116,7 @@ function App() {
 
 		const handleKeyDown = (e) => {
 			updateKey(controls[e.key], true);
+			checkHit(controls[e.key]);
 		}
 
 		const handleKeyUp = (e) => {
@@ -99,28 +133,6 @@ function App() {
 	}, []);
 
 	useEffect(() => {
-		const moveNote = (id, newY) => {
-			setNotes(prev => {
-				const newNotes = [...prev];
-				for(const note of newNotes)
-					if(note.id === id)
-						note.y = newY;
-				return newNotes;
-			});
-		}
-
-		const deleteNote = (id) => {
-			setNotes(prev => {
-				const newNotes = [...prev];
-				for(let i=0; i<newNotes.length; i++) {
-					if(newNotes[i].id === id) {
-						newNotes.splice(i, 1);
-						return newNotes;
-					}
-				}
-				return newNotes;
-			});
-		}
 
 		if(playing && playMap) {
 			const mapInterval = setInterval(() => {
@@ -168,15 +180,17 @@ function App() {
 	return (
 		<div className={styles.main}>
 			<div className={styles.notes}>
+				<div className={styles.hitZone}>
+					<div id='fart' className={styles.keys}>
+						<div className={keys[0] ? styles.active : styles.inActive} />
+						<div className={keys[1] ? styles.active : styles.inActive} />
+						<div className={keys[2] ? styles.active : styles.inActive} />
+						<div className={keys[3] ? styles.active : styles.inActive} />
+					</div>
+				</div>
 				{notes.map((note) => (
 					<div className={styles.note} key={note.id} id={note.id} />
 				))}
-				<div id='fart' className={styles.keys}>
-					<div className={keys[0] ? styles.active : styles.inActive} />
-					<div className={keys[1] ? styles.active : styles.inActive} />
-					<div className={keys[2] ? styles.active : styles.inActive} />
-					<div className={keys[3] ? styles.active : styles.inActive} />
-				</div>
 			</div>
 		</div>
 	);

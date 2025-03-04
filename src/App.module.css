@@ -14,15 +14,12 @@
 }
 
 .keys, .notes {
-	width: calc(4.5 * var(--diameter));
+	width: calc(5 * var(--diameter));
 }
 
 .keys {
-	position: absolute;
-	bottom: 0;
 	display: flex;
-	justify-content: space-between;
-	margin-bottom: 2rem;
+	justify-content: space-around;
 }
 
 .inActive, .active, .note {
@@ -49,8 +46,8 @@
 
 .notes {
 	position: relative;
-	height: 70vh;
-	background-color: #fef;
+	height: 85vh;
+	background-color: #fdf;
 	overflow: hidden;
 }
 
@@ -58,4 +55,14 @@
 	position: absolute;
 	background-color: #f00;
 	top: calc(-1.5 * var(--diameter));
+}
+
+.hitZone {
+	position: absolute;
+	bottom: 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: #fef;
+	height: 8rem;
 }
