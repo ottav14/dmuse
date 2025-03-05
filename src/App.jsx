@@ -48,7 +48,7 @@ function App() {
 	const frameRate = 60;
 	const bpm = 250;
 	const mapLocation = '/maps/speedcore/bloodstorm/bloodstorm.sm';
-	const noteDiameter = 5;
+	const noteDiameter = 100;
 
 	const spawnNote = (x, ix) => {
 		setNotes(prev => {
@@ -117,7 +117,10 @@ function App() {
 			const currentNotes = notesRef.current;
 			for(const note of currentNotes) {
 
-				if(note.lane === ix && note.y >= 750 && note.y <= 900) {
+				const hitZoneElement = document.getElementById('hitZone');
+				const boundingBox = hitZoneElement.getBoundingClientRect();
+
+				if(note.lane === ix && note.y + noteDiameter >= boundingBox.top && note.y - noteDiameter <= boundingBox.bottom) {
 					deleteNote(note.id);
 					setStreak(prev => {
 						if(prev+1 > maxStreakRef.current)
@@ -185,7 +188,7 @@ function App() {
 					moveNote(note.id, newY);
 					const element = document.getElementById(note.id);
 					if(element) {
-						element.style.transform = `translate(${note.x}rem, ${newY}px)`;
+						element.style.transform = `translate(${note.x}px, ${newY}px)`;
 					}
 				}
 			}, 1000/frameRate);
@@ -220,7 +223,7 @@ function App() {
 				Misses: {misses} 
 			</div>
 			<div className={styles.notes}>
-				<div className={styles.hitZone}>
+				<div className={styles.hitZone} id='hitZone'>
 					<div className={styles.keys}>
 						<div 
 							className={keys[0] ? styles.active : styles.inActive} 
