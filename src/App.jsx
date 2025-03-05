@@ -8,8 +8,15 @@ const parseMap = (filename) => {
 	fetch(filename)
 		.then((res) => res.text())
 		.then((data) => {
-			const lines = data.split(/\r?\n/);
-			lines.pop();
+			// Find measure 1
+			const m1_location = data.indexOf('measure 1');
+			const mapData = data.slice(m1_location, data.length);
+			const lines = mapData.split(/\r?\n/);
+			for(let i=0; i<lines.length; i++)
+				if(lines[i].length !== 4)
+					lines.pop(i);
+			console.log(lines);
+
 			for(const line of lines) {
 				const note = [];
 				for(let i=0; i<line.length; i++)
@@ -29,13 +36,16 @@ function App() {
 	const [ playing, setPlaying ] = useState(false);
 	const [ map, setMap ] = useState([]);
 	const [ mapIndex, setMapIndex ] = useState(0);
+	const [ streak, setStreak ] = useState(0);
+	const [ misses, setMisses ] = useState(0);
 	const notesRef = useRef(notes);
 	const mapIndexRef = useRef(mapIndex);
 
-	const speed = 10;
+	const speed = 20;
 	const playMap = true;
 	const frameRate = 60;
-	const bpm = 90;
+	const bpm = 350;
+	const mapLocation = '/maps/speedcore/bloodstorm/bloodstorm.sm';
 
 	const spawnNote = (x, ix) => {
 		setNotes(prev => {
@@ -78,7 +88,7 @@ function App() {
 			const awaitParsedMap = async () => {
 				let parsedMap;
 				try {
-					parsedMap = await parseMap('/maps/test.dm');
+					parsedMap = await parseMap(mapLocation);
 				} catch(error) {
 					console.log(error);
 				} finally {
@@ -178,6 +188,14 @@ function App() {
 	useEffect(() => {
 		mapIndexRef.current = mapIndex;
 	}, [mapIndex]);
+
+	if(loading) {
+		return (
+			<div className={styles.main}>
+				Loading...
+			</div>
+		);
+	}
 
 	return (
 		<div className={styles.main}>
