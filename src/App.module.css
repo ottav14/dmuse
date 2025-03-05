@@ -1,5 +1,5 @@
 :root {
-	--diameter: 4rem;
+	--diameter: 5rem;
 }
 
 .main {
@@ -14,7 +14,7 @@
 }
 
 .keys, .notes {
-	width: calc(5 * var(--diameter));
+	width: calc(4 * var(--diameter));
 }
 
 .keys {
@@ -25,16 +25,8 @@
 .inActive, .active, .note {
 	width: var(--diameter);
 	height: var(--diameter);
-	border: 1px solid #000;
-	border-radius: 50%;
-}
-
-.inActive{
-	background-color: #fef0;
-}
-
-.active {
-	background-color: #00f8;
+	background-size: cover;
+	background-position: center;
 }
 
 .left, .right {
@@ -53,7 +45,6 @@
 
 .note {
 	position: absolute;
-	background-color: #f00;
 	top: calc(-1.5 * var(--diameter));
 }
 
@@ -65,4 +56,12 @@
 	align-items: center;
 	background-color: #fef;
 	height: 8rem;
+}
+
+.stats {
+	position: absolute;
+	left: 25vw;
+	width: 15rem;
+	height: 30rem;
+	background-color: #f0f;
 }

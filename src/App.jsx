@@ -37,20 +37,23 @@ function App() {
 	const [ map, setMap ] = useState([]);
 	const [ mapIndex, setMapIndex ] = useState(0);
 	const [ streak, setStreak ] = useState(0);
+	const [ maxStreak, setMaxStreak ] = useState(0);
 	const [ misses, setMisses ] = useState(0);
 	const notesRef = useRef(notes);
 	const mapIndexRef = useRef(mapIndex);
+	const maxStreakRef = useRef(maxStreak);
 
 	const speed = 20;
 	const playMap = true;
 	const frameRate = 60;
-	const bpm = 350;
+	const bpm = 250;
 	const mapLocation = '/maps/speedcore/bloodstorm/bloodstorm.sm';
+	const noteDiameter = 5;
 
 	const spawnNote = (x, ix) => {
 		setNotes(prev => {
 			const newNote = {
-				x: 24/5*x + 4/5,
+				x: noteDiameter*x,
 				y: 0,
 				id: `${Date.now()}-${ix}`,
 				lane: x
@@ -113,8 +116,14 @@ function App() {
 		const checkHit = (ix) => {
 			const currentNotes = notesRef.current;
 			for(const note of currentNotes) {
+
 				if(note.lane === ix && note.y >= 750 && note.y <= 900) {
 					deleteNote(note.id);
+					setStreak(prev => {
+						if(prev+1 > maxStreakRef.current)
+							setMaxStreak(prev+1);
+						return prev+1;
+					});
 				}
 			}
 		}
@@ -169,6 +178,8 @@ function App() {
 					const newY = note.y + speed;
 					if(newY > window.innerHeight + 50) {
 						deleteNote(note.id);
+						setMisses(prev => prev+1);
+						setStreak(prev => 0);
 						continue;
 					}
 					moveNote(note.id, newY);
@@ -189,6 +200,10 @@ function App() {
 		mapIndexRef.current = mapIndex;
 	}, [mapIndex]);
 
+	useEffect(() => {
+		maxStreakRef.current = maxStreak;
+	}, [maxStreak]);
+
 	if(loading) {
 		return (
 			<div className={styles.main}>
@@ -199,18 +214,54 @@ function App() {
 
 	return (
 		<div className={styles.main}>
+			<div className={styles.stats}>
+				MaxStreak: {maxStreak} <br />
+				Streak: {streak} <br />
+				Misses: {misses} 
+			</div>
 			<div className={styles.notes}>
 				<div className={styles.hitZone}>
-					<div id='fart' className={styles.keys}>
-						<div className={keys[0] ? styles.active : styles.inActive} />
-						<div className={keys[1] ? styles.active : styles.inActive} />
-						<div className={keys[2] ? styles.active : styles.inActive} />
-						<div className={keys[3] ? styles.active : styles.inActive} />
+					<div className={styles.keys}>
+						<div 
+							className={keys[0] ? styles.active : styles.inActive} 
+							style={{
+								backgroundImage: `url('/arrow-left-${keys[0] ? 'blue' : 'yellow'}.svg')`,
+							}}
+						/>
+						<div 
+							className={keys[1] ? styles.active : styles.inActive} 
+							style={{
+								backgroundImage: `url('/arrow-down-${keys[1] ? 'blue' : 'yellow'}.svg')`,
+							}}
+						/>
+						<div 
+							className={keys[2] ? styles.active : styles.inActive} 
+							style={{
+								backgroundImage: `url('/arrow-up-${keys[2] ? 'blue' : 'yellow'}.svg')`,
+							}}
+						/>
+						<div 
+							className={keys[3] ? styles.active : styles.inActive} 
+							style={{
+								backgroundImage: `url('/arrow-right-${keys[3] ? 'blue' : 'yellow'}.svg')`,
+							}}
+						/>
 					</div>
 				</div>
-				{notes.map((note) => (
-					<div className={styles.note} key={note.id} id={note.id} />
-				))}
+				{notes.map((note) => {
+					const directionKey = [ 'left', 'down', 'up', 'right' ];
+
+					return (
+						<div 
+							className={styles.note} 
+							key={note.id} 
+							id={note.id} 
+							style={{
+								backgroundImage: `url('/arrow-${directionKey[note.lane]}-red.svg')`
+							}}
+						/>
+					);
+				})}
 			</div>
 		</div>
 	);
