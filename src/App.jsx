@@ -34,16 +34,18 @@ function App() {
 
 	const speed = 10;
 	const playMap = true;
+	const frameRate = 60;
+	const bpm = 90;
 
-	const spawnNote = (x) => {
+	const spawnNote = (x, ix) => {
 		setNotes(prev => {
 			const newNote = {
 				x: 24/5*x + 4/5,
 				y: 0,
-				id: Date.now(),
+				id: `${Date.now()}-${ix}`,
 				lane: x
 			}
-			return [...notes, newNote];
+			return [...prev, newNote];
 		});
 	}
 
@@ -144,11 +146,11 @@ function App() {
 						setPlaying(prev => false);
 					}
 				}
-				for(const note of map[currentIndex])
-					spawnNote(note);
+				for(let i=0; i<map[currentIndex].length; i++)
+					spawnNote(map[currentIndex][i], i);
 
 				setMapIndex(currentIndex+1);
-			}, 1500);
+			}, 60000/bpm);
 
 
 			const globalInterval = setInterval(() => {
@@ -165,7 +167,7 @@ function App() {
 						element.style.transform = `translate(${note.x}rem, ${newY}px)`;
 					}
 				}
-			}, 16);
+			}, 1000/frameRate);
 		}
 	}, [playing]);
 
