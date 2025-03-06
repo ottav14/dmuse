@@ -49,7 +49,7 @@ function App() {
 	const bpm = 120;
 	const mapLocation = '/maps/vgmp/600-ad-in-piano/600-ad-in-piano.sm';
 	const audioLocation = '/maps/vgmp/600-ad-in-piano/600-ad-in-piano.mp3';
-	const noteDiameter = 100;
+	const noteDiameter = 150;
 
 	const spawnNote = (x, ix) => {
 		setNotes(prev => {

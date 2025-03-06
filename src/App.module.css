@@ -1,5 +1,5 @@
 :root {
-	--diameter: 100px;
+	--diameter: 150px;
 }
 
 .main {
@@ -9,8 +9,8 @@
 	align-items: center;
 	width: 100vw;
 	height: 100vh;
-	background-color: #fff;
 	color: #000;
+	background-color: var(--background);
 }
 
 .keys, .notes {
@@ -38,7 +38,6 @@
 .notes {
 	position: relative;
 	height: 90vh;
-	background-color: #fdf;
 	overflow: hidden;
 }
 
@@ -54,7 +53,7 @@
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	background-color: #fef;
+	background-color: #ffffff23;
 	height: 10rem;
 }
 
@@ -63,5 +62,4 @@
 	left: 25vw;
 	width: 15rem;
 	height: 30rem;
-	background-color: #f0f;
 }
