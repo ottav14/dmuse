@@ -43,11 +43,12 @@ function App() {
 	const mapIndexRef = useRef(mapIndex);
 	const maxStreakRef = useRef(maxStreak);
 
-	const speed = 25;
+	const speed = 15;
 	const playMap = true;
 	const frameRate = 60;
-	const bpm = 350;
-	const mapLocation = '/maps/speedcore/bloodstorm/bloodstorm.sm';
+	const bpm = 120;
+	const mapLocation = '/maps/vgmp/600-ad-in-piano/600-ad-in-piano.sm';
+	const audioLocation = '/maps/vgmp/600-ad-in-piano/600-ad-in-piano.mp3';
 	const noteDiameter = 100;
 
 	const spawnNote = (x, ix) => {
@@ -98,6 +99,9 @@ function App() {
 					setMap(prev => parsedMap);
 					setLoading(false);
 					setPlaying(true);
+
+					const audio = new Audio(audioLocation);
+					audio.play();
 				}
 			}
 			awaitParsedMap();
@@ -120,7 +124,7 @@ function App() {
 				const hitZoneElement = document.getElementById('hitZone');
 				const boundingBox = hitZoneElement.getBoundingClientRect();
 
-				if(note.lane === ix && note.y + noteDiameter >= boundingBox.top && note.y - noteDiameter <= boundingBox.bottom) {
+				if(note.lane === ix && note.y + noteDiameter/2 >= boundingBox.top && note.y - noteDiameter <= boundingBox.bottom) {
 					deleteNote(note.id);
 					setStreak(prev => {
 						if(prev+1 > maxStreakRef.current)
@@ -140,8 +144,12 @@ function App() {
 		}
 
 		const handleKeyDown = (e) => {
-			updateKey(controls[e.key], true);
-			checkHit(controls[e.key]);
+			if(e.key === 'p')
+				setPlaying(prev => !prev);
+			else {	
+				updateKey(controls[e.key], true);
+				checkHit(controls[e.key]);
+			}
 		}
 
 		const handleKeyUp = (e) => {
@@ -159,41 +167,46 @@ function App() {
 
 	useEffect(() => {
 
-		if(playing && playMap) {
-			const mapInterval = setInterval(() => {
-				const currentIndex = mapIndexRef.current;
-				if(currentIndex >= map.length) {
-					return () => {
-						clearInterval(globalInterval);
-						clearInterval(mapInterval);
-						setPlaying(prev => false);
-					}
-				}
-				for(let i=0; i<map[currentIndex].length; i++)
-					spawnNote(map[currentIndex][i], i);
+		if(!playing) {
 
-				setMapIndex(currentIndex+1);
-			}, 60000/bpm);
-
-
-			const globalInterval = setInterval(() => {
-				const currentNotes = notesRef.current;
-				for(const note of currentNotes) {
-					const newY = note.y + speed;
-					if(newY > window.innerHeight + 50) {
-						deleteNote(note.id);
-						setMisses(prev => prev+1);
-						setStreak(prev => 0);
-						continue;
-					}
-					moveNote(note.id, newY);
-					const element = document.getElementById(note.id);
-					if(element) {
-						element.style.transform = `translate(${note.x}px, ${newY}px)`;
-					}
-				}
-			}, 1000/frameRate);
 		}
+
+		const mapInterval = setInterval(() => {
+			const currentIndex = mapIndexRef.current;
+			if(currentIndex >= map.length) {
+				return () => {
+					clearInterval(globalInterval);
+					clearInterval(mapInterval);
+					setPlaying(prev => false);
+				}
+			}
+			for(let i=0; i<map[currentIndex].length; i++)
+				spawnNote(map[currentIndex][i], i);
+
+			setMapIndex(currentIndex+1);
+		}, 60000/bpm);
+
+
+		const globalInterval = setInterval(() => {
+			if(!playing)
+				return;
+
+			const currentNotes = notesRef.current;
+			for(const note of currentNotes) {
+				const newY = note.y + speed;
+				if(newY > window.innerHeight + 150) {
+					deleteNote(note.id);
+					setMisses(prev => prev+1);
+					setStreak(prev => 0);
+					continue;
+				}
+				moveNote(note.id, newY);
+				const element = document.getElementById(note.id);
+				if(element) {
+					element.style.transform = `translate(${note.x}px, ${newY}px)`;
+				}
+			}
+		}, 1000/frameRate);
 	}, [playing]);
 
 	useEffect(() => {
@@ -230,24 +243,28 @@ function App() {
 							className={keys[0] ? styles.active : styles.inActive} 
 							style={{
 								backgroundImage: `url('/arrow-left-${keys[0] ? 'blue' : 'yellow'}.svg')`,
+								backgroundSize: `${keys[0] ? '100%' : '90%'}`
 							}}
 						/>
 						<div 
 							className={keys[1] ? styles.active : styles.inActive} 
 							style={{
 								backgroundImage: `url('/arrow-down-${keys[1] ? 'blue' : 'yellow'}.svg')`,
+								backgroundSize: `${keys[1] ? '100%' : '90%'}`
 							}}
 						/>
 						<div 
 							className={keys[2] ? styles.active : styles.inActive} 
 							style={{
 								backgroundImage: `url('/arrow-up-${keys[2] ? 'blue' : 'yellow'}.svg')`,
+								backgroundSize: `${keys[2] ? '100%' : '90%'}`
 							}}
 						/>
 						<div 
 							className={keys[3] ? styles.active : styles.inActive} 
 							style={{
 								backgroundImage: `url('/arrow-right-${keys[3] ? 'blue' : 'yellow'}.svg')`,
+								backgroundSize: `${keys[3] ? '100%' : '90%'}`
 							}}
 						/>
 					</div>

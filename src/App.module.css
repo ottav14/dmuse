@@ -25,7 +25,6 @@
 .inActive, .active, .note {
 	width: var(--diameter);
 	height: var(--diameter);
-	background-size: cover;
 	background-position: center;
 }
 
@@ -46,6 +45,7 @@
 .note {
 	position: absolute;
 	top: calc(-1.5 * var(--diameter));
+	background-size: 90%;
 }
 
 .hitZone {
