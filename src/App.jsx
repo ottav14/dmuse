@@ -43,10 +43,10 @@ function App() {
 	const mapIndexRef = useRef(mapIndex);
 	const maxStreakRef = useRef(maxStreak);
 
-	const speed = 20;
+	const speed = 25;
 	const playMap = true;
 	const frameRate = 60;
-	const bpm = 250;
+	const bpm = 350;
 	const mapLocation = '/maps/speedcore/bloodstorm/bloodstorm.sm';
 	const noteDiameter = 100;
 
@@ -127,6 +127,7 @@ function App() {
 							setMaxStreak(prev+1);
 						return prev+1;
 					});
+					break;
 				}
 			}
 		}
