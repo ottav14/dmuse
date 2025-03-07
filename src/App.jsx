@@ -3,50 +3,30 @@ import styles from './App.module.css';
 import fs from 'fs';
 import readline from 'readline';
 
-const parseMap = (filename) => {
-	const parsedData = [];
-	fetch(filename)
-		.then((res) => res.text())
-		.then((data) => {
-			// Find measure 1
-			const m1_location = data.indexOf('measure 1');
-			const mapData = data.slice(m1_location, data.length);
-			const lines = mapData.split(/\r?\n/);
-			for(let i=0; i<lines.length; i++)
-				if(lines[i].length !== 4)
-					lines.pop(i);
-			console.log(lines);
-
-			for(const line of lines) {
-				const note = [];
-				for(let i=0; i<line.length; i++)
-					if(line[i] === '1')
-						note.push(i);
-				parsedData.push(note);
-			}
-		})
-	return parsedData;
-}
 
 function App() {
 
 	const [ keys, setKeys ] = useState(Array(4).fill(false));
 	const [ notes, setNotes ] = useState([]);
+	const [ bpm, setBpm ] = useState(0);
 	const [ loading, setLoading ] = useState(true);
 	const [ playing, setPlaying ] = useState(false);
 	const [ map, setMap ] = useState([]);
+	const [ bpms, setBpms ] = useState([]);
+	const [ timings, setTimings ] = useState([]);
 	const [ mapIndex, setMapIndex ] = useState(0);
+	const [ timingIndex, setTimingIndex ] = useState(1);
 	const [ streak, setStreak ] = useState(0);
 	const [ maxStreak, setMaxStreak ] = useState(0);
 	const [ misses, setMisses ] = useState(0);
 	const notesRef = useRef(notes);
 	const mapIndexRef = useRef(mapIndex);
 	const maxStreakRef = useRef(maxStreak);
+	const timingIndexRef = useRef(timingIndex);
 
-	const speed = 15;
+	const speed = 20;
 	const playMap = true;
 	const frameRate = 60;
-	const bpm = 120;
 	const mapLocation = '/maps/vgmp/600-ad-in-piano/600-ad-in-piano.sm';
 	const audioLocation = '/maps/vgmp/600-ad-in-piano/600-ad-in-piano.mp3';
 	const noteDiameter = 150;
@@ -88,6 +68,48 @@ function App() {
 
 	useEffect(() => {
 
+		const parseMap = (filename) => {
+			const parsedNotes = [];
+			const parsedBpms = [];
+			const parsedTimings = [];
+			fetch(filename)
+				.then((res) => res.text())
+				.then((data) => {
+
+					// Parse bpms
+					const bpmId = '#BPMS:';
+					const bpmLocation = data.indexOf(bpmId) + bpmId.length;
+					const bpmData = data.slice(bpmLocation, data.length).split(/\r?\n/)[0];
+					const bpmItems = bpmData.split(',');
+					bpmItems.map(item => {
+						const dataChunks = item.split('=');
+						parsedBpms.push(dataChunks[1]);
+						parsedTimings.push(dataChunks[0]);
+					});
+
+
+					// Find measure 1
+					const m1Location = data.indexOf('measure 1');
+					const mapData = data.slice(m1Location, data.length);
+					const lines = mapData.split(/\r?\n/);
+					for(let i=0; i<lines.length; i++)
+						if(lines[i].length !== 4)
+							lines.splice(i, 1);
+
+					for(const line of lines) {
+						const note = [];
+						for(let i=0; i<line.length; i++)
+							if(line[i] === '1')
+								note.push(i);
+						parsedNotes.push(note);
+					}
+					setMap(prev => parsedNotes);
+					setBpms(prev => parsedBpms);
+					setBpm(prev => parsedBpms[0]);
+					setTimings(prev => parsedTimings);
+				});
+		}
+
 		if(loading) {
 			const awaitParsedMap = async () => {
 				let parsedMap;
@@ -96,7 +118,6 @@ function App() {
 				} catch(error) {
 					console.log(error);
 				} finally {
-					setMap(prev => parsedMap);
 					setLoading(false);
 					setPlaying(true);
 
@@ -167,47 +188,58 @@ function App() {
 
 	useEffect(() => {
 
-		if(!playing) {
+		if(playing && bpm !== 0) {
+			const mapInterval = setInterval(() => {
+				const currentIndex = mapIndexRef.current;
+				const currentTiming = timings[timingIndexRef.current];
+				console.log(currentTiming);
 
-		}
-
-		const mapInterval = setInterval(() => {
-			const currentIndex = mapIndexRef.current;
-			if(currentIndex >= map.length) {
-				return () => {
+				if(currentIndex >= map.length) {
 					clearInterval(globalInterval);
 					clearInterval(mapInterval);
 					setPlaying(prev => false);
+					return;
 				}
-			}
-			for(let i=0; i<map[currentIndex].length; i++)
-				spawnNote(map[currentIndex][i], i);
-
-			setMapIndex(currentIndex+1);
-		}, 60000/bpm);
-
-
-		const globalInterval = setInterval(() => {
-			if(!playing)
-				return;
-
-			const currentNotes = notesRef.current;
-			for(const note of currentNotes) {
-				const newY = note.y + speed;
-				if(newY > window.innerHeight + 150) {
-					deleteNote(note.id);
-					setMisses(prev => prev+1);
-					setStreak(prev => 0);
-					continue;
+				for(let i=0; i<map[currentIndex].length; i++) {
+					spawnNote(map[currentIndex][i], i);
 				}
-				moveNote(note.id, newY);
-				const element = document.getElementById(note.id);
-				if(element) {
-					element.style.transform = `translate(${note.x}px, ${newY}px)`;
+				if(currentIndex > currentTiming) {
+					setMapIndex(prev => prev+1);
+					setTimingIndex(prev => prev+1);
+					setBpm(prev => bpms[timingIndexRef.current]);
+					clearInterval(globalInterval);
+					clearInterval(mapInterval);
+					setPlaying(prev => true);
+					return; 
 				}
-			}
-		}, 1000/frameRate);
-	}, [playing]);
+
+				setMapIndex(currentIndex+1);
+			}, 60000/bpm);
+
+
+			const globalInterval = setInterval(() => {
+				if(!playing)
+					return;
+
+				const currentNotes = notesRef.current;
+				for(const note of currentNotes) {
+					const newY = note.y + speed;
+					if(newY > window.innerHeight + 150) {
+						deleteNote(note.id);
+						setMisses(prev => prev+1);
+						setStreak(prev => 0);
+						continue;
+					}
+					moveNote(note.id, newY);
+					const element = document.getElementById(note.id);
+					if(element) {
+						element.style.transform = `translate(${note.x}px, ${newY}px)`;
+					}
+				}
+			}, 1000/frameRate);
+			setPlaying(prev => false);
+		}
+	}, [playing, map]);
 
 	useEffect(() => {
 		notesRef.current = notes;
@@ -220,6 +252,13 @@ function App() {
 	useEffect(() => {
 		maxStreakRef.current = maxStreak;
 	}, [maxStreak]);
+
+	useEffect(() => {
+		timingIndexRef.current = timingIndex;
+	}, [timingIndex]);
+
+	useEffect(() => {
+	}, [mapIndex]);
 
 	if(loading) {
 		return (
@@ -234,7 +273,9 @@ function App() {
 			<div className={styles.stats}>
 				MaxStreak: {maxStreak} <br />
 				Streak: {streak} <br />
-				Misses: {misses} 
+				Misses: {misses} <br />
+				Bpm: {bpm} <br />
+				Beat: {mapIndex} 
 			</div>
 			<div className={styles.notes}>
 				<div className={styles.hitZone} id='hitZone'>
